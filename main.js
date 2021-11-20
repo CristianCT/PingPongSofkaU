@@ -13,13 +13,6 @@ class Board{
         elements.push(this.ball);
         return elements
     }
-    down() {
-
-    }
-
-    up() {
-
-    }
 }
 
 // Se define la clase con la tabla del juego y sus respectivos metodos
@@ -37,9 +30,16 @@ class BoardView{
             draw(this.ctx, el);
         }
     }
+    clean(){
+        this.ctx.clearRect(0, 0, this.board.width, this.board.height);
+    }
+    play(){
+        this.clean();
+        this.draw();
+    }
 }
 
-// Se define la clase con las caracteristicas de las barras laterales
+// Se define la clase con las caracteristicas de las barras laterales con sus respectivos metodos
 class Bar{
     constructor(x, y, width, height, board){
         this.x = x;
@@ -48,7 +48,32 @@ class Bar{
         this.height = height;
         this.board = board;
         this.kind = "rectangle";
+        this.speed = 10;
+
         this.board.bars.push(this);
+    }
+    down() {
+        this.y += this.speed;
+    }
+
+    up() {
+        this.y -= this.speed;
+    }
+}
+
+//  Se define la clase con las caracteristicas de la esfera
+class Ball{
+    constructor(x, y, radius, board){
+        this.x = x;
+        this.y = y;
+        this.radius = radius;
+        this.speed = 5;
+        this.speedY = 0;
+        this.speedX = 3;
+        this.board = board;
+        board.ball = this;
+
+        this.kind = "circle";
     }
 }
 
@@ -59,18 +84,51 @@ function draw(ctx, element){
             case "rectangle":                
                 ctx.fillRect(element.x, element.y, element.width, element.height);
                 break;
+            case "circle":
+                ctx.beginPath();
+                ctx.arc(element.x, element.y, element.radius, 0, 7);
+                ctx.fill();
+                ctx.closePath();
+                break;
         }
     }
 }
 
 window.addEventListener("load", main);
+window.requestAnimationFrame(mover);
+
+// Asignación de metodos a las teclas
+document.addEventListener("keydown", e => {
+    console.log(e);
+    e.preventDefault();
+    if(e.keyCode == 38){
+        bar2.up();
+    } else if (e.keyCode == 40){
+        bar2.down();
+    }
+    else if (e.keyCode == 87){
+        bar1.up();
+    }
+    else if (e.keyCode == 83){
+        bar1.down();
+    }
+});
 
 // Metodo principal para instanciar las clases
+var bar1;
+var bar2;
+var boardView;
 function main(){
     var board = new Board(1200, 600);
-    var bar = new Bar(20, 100, 40, 100, board);
-    var bar = new Bar(1140, 100, 40, 100, board);
+    bar1 = new Bar(20, 100, 40, 100, board);
+    bar2 = new Bar(1140, 100, 40, 100, board);
     var canvas = document.getElementById("canvas");
-    var boardView = new BoardView(canvas, board);
-    boardView.draw();
+    boardView = new BoardView(canvas, board);
+    var ball = new Ball(350, 100, 10, board);
+    mover();
+}
+
+function mover(){
+    boardView.play();
+    window.requestAnimationFrame(mover);
 }
