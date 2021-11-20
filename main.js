@@ -7,9 +7,10 @@ class Board{
         this.gameOver = false;
         this.bars = [];
         this.ball = null;
+        this.playing = false;
     }
     get elements() {
-        var elements = this.bars;
+        var elements = this.bars.map(bar => { return bar });
         elements.push(this.ball);
         return elements
     }
@@ -34,8 +35,11 @@ class BoardView{
         this.ctx.clearRect(0, 0, this.board.width, this.board.height);
     }
     play(){
-        this.clean();
-        this.draw();
+        if(!this.board.playing){
+            this.clean();
+            this.draw();
+            this.board.ball.move();
+        }
     }
 }
 
@@ -72,8 +76,14 @@ class Ball{
         this.speedX = 3;
         this.board = board;
         board.ball = this;
+        this.direction = 1;
 
         this.kind = "circle";
+    }
+
+    move(){
+        this.x += this.speedX*this.direction;
+        this.y += this.speedY;
     }
 }
 
@@ -101,16 +111,18 @@ window.requestAnimationFrame(mover);
 document.addEventListener("keydown", e => {
     console.log(e);
     e.preventDefault();
-    if(e.keyCode == 38){
+    if(e.keyCode === 38){
         bar2.up();
-    } else if (e.keyCode == 40){
+    } else if (e.keyCode === 40){
         bar2.down();
     }
-    else if (e.keyCode == 87){
+    else if (e.keyCode === 87){
         bar1.up();
     }
-    else if (e.keyCode == 83){
+    else if (e.keyCode === 83){
         bar1.down();
+    } else if(e.keyCode === 32){
+        board.playing = !board.playing;
     }
 });
 
@@ -118,8 +130,9 @@ document.addEventListener("keydown", e => {
 var bar1;
 var bar2;
 var boardView;
+var board;
 function main(){
-    var board = new Board(1200, 600);
+    board = new Board(1200, 600);
     bar1 = new Bar(20, 100, 40, 100, board);
     bar2 = new Bar(1140, 100, 40, 100, board);
     var canvas = document.getElementById("canvas");
