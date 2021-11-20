@@ -38,7 +38,16 @@ class BoardView{
         if(!this.board.playing){
             this.clean();
             this.draw();
+            this.checkCollisions();
             this.board.ball.move();
+        }
+    }
+    checkCollisions(){
+        for(var i = this.board.bars.length - 1; i >= 0; i--){
+            var bar = this.board.bars[i];
+            if(hit(bar, this.board.ball)){
+                this.board.ball.collision(bar);
+            }
         }
     }
 }
@@ -71,12 +80,14 @@ class Ball{
         this.x = x;
         this.y = y;
         this.radius = radius;
-        this.speed = 5;
+        this.speed = 3;
         this.speedY = 0;
         this.speedX = 3;
         this.board = board;
         board.ball = this;
         this.direction = 1;
+        this.bounceAngle = 0;
+        this.maxBounceAngle = Math.PI/12;
 
         this.kind = "circle";
     }
@@ -84,6 +95,28 @@ class Ball{
     move(){
         this.x += this.speedX*this.direction;
         this.y += this.speedY;
+    }
+
+    get width(){
+        return this.radius*2;
+    }
+
+    get height(){
+        return this.radius*2;
+    }
+
+    collision(bar){
+
+        var relativeIntersectY = (bar.y + (bar.height/2)) - this.y;
+        var normalizedIntersectY = relativeIntersectY/(bar.height/2);
+        this.bounceAngle = normalizedIntersectY * this.maxBounceAngle;
+        
+        this.speedY = this.speed * -Math.sin(this.bounceAngle);
+        
+        this.speedX = this.speed * Math.cos(this.bounceAngle);
+                
+        if(this.x > (this.board.width/2)) this.direction = -1;
+        else this.direction = 1;
     }
 }
 
@@ -102,6 +135,28 @@ function draw(ctx, element){
                 break;
         }
     }
+}
+
+function hit(a, b){
+    var hit = false;
+    console.log(b.height);
+    if(b.x + b.width >= a.x && b.x < a.x + a.width){
+        if(b.y + b.height >= a.y && b.y < a.y + a.height)
+            hit = true;
+    }
+
+    if(b.x <= a.x && b.x + b.width >= a.x + a.width){
+        if(b.y <= a.y && b.y + b.height >= a.y + a.height){
+            hit = true;
+        }
+    }
+
+    if(a.x <= b.x && a.x + a.width >= b.x + b.width){
+        if(a.y <= b.y && a.y + a.height >= b.y + b.height){
+            hit = true;
+        }
+    }
+    return hit;
 }
 
 window.addEventListener("load", main);
