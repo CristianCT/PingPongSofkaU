@@ -49,6 +49,9 @@ class BoardView{
                 this.board.ball.collision(bar);
             }
         }
+        if(this.board.ball.y<10 || this.board.ball.y>590){
+            this.board.ball.speedY *= -1;
+        }
     }
 }
 
@@ -66,11 +69,19 @@ class Bar{
         this.board.bars.push(this);
     }
     down() {
-        this.y += this.speed;
-    }
-
-    up() {
-        this.y -= this.speed;
+        if((!this.board.playing)){
+            if(this.y<600-this.height){
+                this.y += this.speed;
+            }
+        } 
+    } 
+ 
+    up() { 
+        if((!this.board.playing)){
+            if(this.y>0){
+                this.y -= this.speed;
+            }
+        }
     }
 }
 
@@ -139,7 +150,7 @@ function draw(ctx, element){
 
 function hit(a, b){
     var hit = false;
-    console.log(b.height);
+    //console.log(b.height);
     if(b.x + b.width >= a.x && b.x < a.x + a.width){
         if(b.y + b.height >= a.y && b.y < a.y + a.height)
             hit = true;
@@ -164,7 +175,6 @@ window.requestAnimationFrame(mover);
 
 // Asignación de metodos a las teclas
 document.addEventListener("keydown", e => {
-    console.log(e);
     e.preventDefault();
     if(e.keyCode === 38){
         bar2.up();
